@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#2563eb">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Der, die, das – Artikel-Quiz</title>
+<style>
+:root{--bg:#f6f5f1;--card:#fff;--text:#1d1d1b;--muted:#6b6a65;--line:#e2e0d9;--der:#2563eb;--die:#dc2626;--das:#16a34a;--ok:#16a34a;--bad:#dc2626;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#151514;--card:#201f1d;--text:#f1efe8;--muted:#a09e96;--line:#34322e;--der:#60a5fa;--die:#f87171;--das:#4ade80;--ok:#4ade80;--bad:#f87171}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#151514;--card:#201f1d;--text:#f1efe8;--muted:#a09e96;--line:#34322e;--der:#60a5fa;--die:#f87171;--das:#4ade80;--ok:#4ade80;--bad:#f87171}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh;display:flex;justify-content:center}
+main{width:100%;max-width:480px;padding:20px 16px 32px}
+h1{font-size:1.1rem;margin:0 0 14px;font-weight:600}
+.stats{display:flex;gap:8px;margin-bottom:16px}
+.stat{flex:1;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 10px;text-align:center}
+.stat b{display:block;font-size:1.25rem}
+.stat span{font-size:.72rem;color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:32px 16px;text-align:center}
+.word{font-size:2.4rem;font-weight:700;margin:0 0 6px;word-break:break-word}
+.sub{color:var(--muted);font-size:.9rem;min-height:1.2em}
+.btns{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+.btns button{font:inherit;font-size:1.2rem;font-weight:700;padding:16px 4px;border-radius:14px;border:2px solid currentColor;background:var(--card);cursor:pointer}
+.b-der{color:var(--der)}.b-die{color:var(--die)}.b-das{color:var(--das)}
+.btns button:disabled{cursor:default;opacity:.45}
+.btns button.right{opacity:1;background:var(--ok);color:#fff;border-color:var(--ok)}
+.btns button.wrong{opacity:1;background:var(--bad);color:#fff;border-color:var(--bad)}
+.fb{margin-top:16px;min-height:3.2em;text-align:center}
+.fb strong{display:block;font-size:1.05rem}
+.fb small{color:var(--muted)}
+.next{display:none;width:100%;margin-top:10px;font:inherit;font-weight:600;padding:14px;border-radius:14px;border:0;background:var(--text);color:var(--bg);cursor:pointer}
+.lv{display:flex;gap:6px;margin-bottom:14px}.lv button{font:inherit;font-size:.85rem;font-weight:600;padding:6px 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--muted);cursor:pointer}.lv button.on{background:var(--text);color:var(--bg);border-color:var(--text)}
+.tip{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--der);border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:.9rem;line-height:1.45}.tip[hidden]{display:none}.tip p{margin:0 0 8px}.tip button{font:inherit;font-weight:600;font-size:.85rem;padding:6px 14px;border-radius:999px;border:0;background:var(--text);color:var(--bg);cursor:pointer}
+.foot{flex-wrap:wrap;gap:6px}
+.foot{margin-top:20px;display:flex;justify-content:space-between;color:var(--muted);font-size:.8rem}
+.foot button{font:inherit;background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;padding:0}
+</style>
+</head>
+<body>
+<main>
+<h1>Der, die, das – Artikel-Quiz</h1>
+<div class="tip" id="tip" hidden><p><strong>Lerntipp:</strong> Für die meisten deutschen Wörter gibt es keine feste Regel für den Artikel. Am besten lernst du jedes Nomen gleich mit seinem Artikel. Ein paar Endungen helfen dabei – die zeigen wir dir nach jeder Antwort.</p><button id="tipOk">Verstanden</button></div>
+<div class="lv" id="lv"><button data-l="A1">A1</button><button data-l="A2">A2</button><button data-l="Pro">Pro-Level</button><button data-l="alle">Alle</button><button data-l="Fehler" id="lvF">Fehler (0)</button></div>
+<div class="stats">
+<div class="stat"><b id="sStreak">0</b><span>Serie</span></div>
+<div class="stat"><b id="sBest">0</b><span>Bestserie</span></div>
+<div class="stat"><b id="sRate">–</b><span>Trefferquote</span></div>
+</div>
+<div class="card"><p class="word" id="word"></p><p class="sub" id="clue">Welcher Artikel passt?</p></div>
+<div class="btns" id="btns">
+<button class="b-der" data-a="der">der</button>
+<button class="b-die" data-a="die">die</button>
+<button class="b-das" data-a="das">das</button>
+</div>
+<div class="fb" id="fb"></div>
+<button class="next" id="next">Weiter</button>
+<div class="foot"><span>Tasten: 1 = der, 2 = die, 3 = das</span><span><button id="tipBtn">Lerntipp</button> · <button id="reset">Zurücksetzen</button></span></div>
+</main>
+<script>
+// Wortliste nach Niveau. Neue Wörter einfach in den passenden Text einfügen (durch Leerzeichen getrennt).
+var D={
+A1:{der:"Tisch Stuhl Hund Apfel Löffel Käse Bahnhof Regen Schlüssel Kuchen Zucker Fisch Mann Vater Bruder Sohn Freund Kaffee Tee Saft Salat Reis Computer Bus Zug Koffer Mantel Pullover Schuh Hut Garten Park Platz Baum Himmel Tag Monat Morgen Abend Montag Dienstag Mittwoch Donnerstag Freitag Samstag Sonntag Frühling Sommer Herbst Winter",
+die:"Lampe Katze Schule Blume Banane Straße Tasche Küche Sonne Milch Suppe Nudel Frau Mutter Schwester Tochter Freundin Familie Zeitung Wohnung Uhr Tür Stadt Woche Minute Stunde Zeit Hose Jacke Brille Flasche Tomate Butter Kartoffel Orange Zitrone Arbeit Reise Musik Zahl Farbe Nacht",
+das:"Haus Buch Auto Fenster Wasser Kind Foto Handy Wetter Hotel Büro Zimmer Geschenk Brot Salz Ei Fleisch Mädchen Brötchen Bett Bild Geld Essen Frühstück Mittagessen Abendessen Restaurant Café Kino Telefon Radio Fahrrad Jahr Land Obst Gemüse Bier Glas Messer Heft Wort Spiel Hemd Kleid Gesicht Auge Ohr Bein Haar"},
+A2:{der:"Arzt Beruf Chef Kollege Nachbar Gast Geburtstag Urlaub Flughafen Flug Ausweis Termin Brief Fernseher Kühlschrank Teppich Spiegel Schrank Balkon Aufzug Weg Berg Wald Strand Regenschirm Rucksack Schal Handschuh Wunsch Vorschlag Unterschied Erfolg Preis Lohn Vertrag Eindruck Grund",
+die:"Ärztin Lehrerin Gesundheit Möglichkeit Gelegenheit Schwierigkeit Freiheit Information Universität Wirtschaft Gesellschaft Erfahrung Meinung Entscheidung Bewerbung Bedeutung Verspätung Rechnung Prüfung Übung Lösung Idee Kultur Politik Natur Umwelt Gefahr Hilfe Geschichte Gegend Ecke Treppe Decke Kasse Bank Post Apotheke Bibliothek Haltestelle Versicherung",
+das:"Ergebnis Problem Thema Ziel Recht Gespräch Angebot Mitglied Gebäude Ende Instrument Museum Zentrum Datum Programm Mittel Stück Paket Ticket Gepäck Gleis Leben Wochenende Studium Fieber Gefühl Interesse Beispiel Verhältnis Gesetz Ding Lied Städtchen"}
+};
+var W=[],lvl="A1";
+for(var L in D)for(var a in D[L])D[L][a].split(" ").forEach(function(w){W.push([a,w,null,L])});
+// Pro-Level: Wörter mit mehreren Artikeln. [Wort, [Artikel, Bedeutung], ...]
+var P=[
+["See",["der","Gewässer im Landesinneren"],["die","das Meer"]],
+["Band",["der","ein Buch aus einer Reihe"],["das","Stoffband oder Tonband"],["die","Musikgruppe"]],
+["Leiter",["der","Person, die etwas leitet"],["die","Steiggerät zum Hinaufklettern"]],
+["Kiefer",["der","Knochen im Gesicht"],["die","Nadelbaum"]],
+["Schild",["das","Verkehrsschild, Namensschild"],["der","Schutzschild eines Kriegers"]],
+["Steuer",["die","Abgabe an den Staat"],["das","Lenkrad"]],
+["Verdienst",["der","Einkommen"],["das","besondere Leistung"]],
+["Gehalt",["das","Lohn pro Monat"],["der","Inhalt oder Anteil, z. B. Alkoholgehalt"]],
+["Erbe",["der","Person, die erbt"],["das","das Hinterlassene"]],
+["Moment",["der","Augenblick"],["das","Faktor, Aspekt (Fachsprache)"]],
+["Pony",["das","das Pferd"],["der","die Frisur"]],
+["Hut",["der","Kopfbedeckung"],["die","Obhut (auf der Hut sein)"]],
+["Heide",["der","Person ohne christlichen Glauben"],["die","Landschaft mit Heidekraut"]],
+["Mark",["die","alte Währung (D-Mark)"],["das","Knochenmark"]],
+["Golf",["der","große Meeresbucht"],["das","Sportart"]],
+["Bund",["der","Bündnis oder Verband"],["das","Bündel, z. B. ein Bund Radieschen"]],
+["Weise",["der","kluger Mensch"],["die","Art und Weise"]],
+["Harz",["das","klebriger Baumsaft"],["der","Mittelgebirge in Deutschland"]],
+["Flur",["der","Gang in einem Haus"],["die","Feld und Wiese (Landschaft)"]],
+["Wehr",["das","Stauanlage im Fluss"],["die","Verteidigung, z. B. Feuerwehr"]],
+["Ekel",["der","starkes Abscheugefühl"],["das","unangenehmer Mensch"]],
+["Stift",["der","Schreibgerät"],["das","kirchliche Einrichtung oder Altenheim"]]
+];
+P.forEach(function(p){var m=p.slice(1),ex=m.map(function(x){return x[0]+" "+p[0]+" = "+x[1]}).join(" · ");m.forEach(function(x){W.push([x[0],p[0],null,"Pro",x[1],ex])})});
+// Regeln für die Hinweise: [Artikel, Wortende, Text]
+var RULES=[
+["die",/(ung|heit|keit|schaft)$/,"Die Endungen -ung, -heit, -keit und -schaft sind immer feminin."],
+["die",/(ität|ion)$/,"Die Endungen -ität und -ion sind fast immer feminin."],
+["die",/^(Freundin|Ärztin|Lehrerin)$/,"Weibliche Personen auf -in sind feminin."],
+["die",/^Nacht$/,"Tageszeiten sind maskulin – nur die Nacht ist eine Ausnahme."],
+["das",/(chen|lein)$/,"Die Endungen -chen und -lein machen Wörter sächlich."],
+["das",/(ment|um)$/,"Die Endungen -ment und -um sind meist sächlich."],
+["der",/^(Tag|Monat|Morgen|Abend|Montag|Dienstag|Mittwoch|Donnerstag|Freitag|Samstag|Sonntag|Frühling|Sommer|Herbst|Winter)$/,"Wochentage, Monate, Tageszeiten und Jahreszeiten sind maskulin."],
+["der",/er$/,"Wörter auf -er sind oft maskulin (Personen, Geräte)."],
+["die",/e$/,"Wörter auf -e sind meist feminin (Ausnahmen: der Käse, das Ende)."]
+];
+function hintFor(a,w){for(var i=0;i<RULES.length;i++)if(RULES[i][0]===a&&RULES[i][1].test(w))return RULES[i][2];return "Dafür gibt es keine feste Regel – einfach merken."}
+var KEY="artikelquiz.v1",st={streak:0,best:0,ok:0,total:0},queue=[],cur=null,locked=false;
+var miss={};try{miss=JSON.parse(localStorage.getItem(KEY+".miss"))||{}}catch(e){miss={}}
+function kk(w){return w[3]+w[0]+w[1]}
+function load(){try{var s=JSON.parse(localStorage.getItem(KEY));if(s&&typeof s.total==="number")st=s}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(st));localStorage.setItem(KEY+".miss",JSON.stringify(miss))}catch(e){}}
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
+function $(id){return document.getElementById(id)}
+function stats(){$("lvF").textContent="Fehler ("+Object.keys(miss).length+")";$("sStreak").textContent=st.streak;$("sBest").textContent=st.best;$("sRate").textContent=st.total?Math.round(100*st.ok/st.total)+" %":"–"}
+function nextWord(){
+ if(!queue.length)queue=shuffle(W.filter(function(w){return lvl==="Fehler"?!!miss[kk(w)]:(lvl==="alle"||w[3]===lvl)}));
+ if(!queue.length){cur=null;locked=true;$("word").textContent="Keine Fehlerwörter";$("clue").textContent="Hier ist gerade nichts offen – wähle ein anderes Niveau.";$("fb").innerHTML="";$("next").style.display="none";var e=$("btns").children;for(var j=0;j<e.length;j++)e[j].disabled=true;return}
+ cur=queue.shift();locked=false;
+ $("word").textContent=cur[1];$("clue").textContent=cur[4]?"Gemeint ist: "+cur[4]:"Welcher Artikel passt?";$("fb").innerHTML="";$("next").style.display="none";
+ var bs=$("btns").children;for(var i=0;i<bs.length;i++){bs[i].disabled=false;bs[i].className=bs[i].className.replace(/ ?(right|wrong)/g,"")}
+}
+function answer(a){
+ if(locked)return;locked=true;st.total++;
+ var good=a===cur[0],bs=$("btns").children;
+ for(var i=0;i<bs.length;i++){var b=bs[i];b.disabled=true;
+  if(b.dataset.a===cur[0])b.className+=" right";
+  else if(b.dataset.a===a)b.className+=" wrong"}
+ if(good){st.ok++;st.streak++;if(st.streak>st.best)st.best=st.streak;
+  var k=kk(cur);if(lvl==="Fehler"&&miss[k]){miss[k]--;if(miss[k]<=0)delete miss[k];else queue.splice(Math.min(4,queue.length),0,cur)}} // Fehlerwort: 2x richtig = geschafft
+ else{st.streak=0;miss[kk(cur)]=2;queue.splice(Math.min(3,queue.length),0,cur)} // falsches Wort kommt bald wieder
+ var hint=cur[5]||hintFor(cur[0],cur[1]);
+ $("fb").innerHTML="<strong>"+(good?"Richtig! ":"Leider falsch. ")+cur[0]+" "+cur[1]+"</strong><small>"+hint+"</small>";
+ $("next").style.display="block";$("next").focus();
+ save();stats();
+}
+$("btns").addEventListener("click",function(e){var b=e.target.closest("button");if(b)answer(b.dataset.a)});
+$("next").addEventListener("click",nextWord);
+$("reset").addEventListener("click",function(){st={streak:0,best:0,ok:0,total:0};queue=[];miss={};save();stats();nextWord()});
+document.addEventListener("keydown",function(e){
+ if(!locked){var m={"1":"der","2":"die","3":"das"};if(m[e.key])answer(m[e.key])}
+ else if(e.key==="Enter"||e.key===" "){e.preventDefault();nextWord()}
+});
+function setLvl(l){lvl=l;queue=[];try{localStorage.setItem(KEY+".lvl",l)}catch(e){}var b=$("lv").children;for(var i=0;i<b.length;i++)b[i].className=b[i].dataset.l===l?"on":"";nextWord()}
+$("lv").addEventListener("click",function(e){var b=e.target.closest("button");if(b)setLvl(b.dataset.l)});
+var TK=KEY+".tip";
+function tipShow(v){$("tip").hidden=!v}
+$("tipOk").addEventListener("click",function(){tipShow(false);try{localStorage.setItem(TK,"1")}catch(e){}});
+$("tipBtn").addEventListener("click",function(){tipShow($("tip").hidden)});
+var seen=null;try{seen=localStorage.getItem(TK)}catch(e){}
+tipShow(!seen);
+var sl=null;try{sl=localStorage.getItem(KEY+".lvl")}catch(e){}
+load();stats();setLvl(sl==="A2"||sl==="Pro"||sl==="alle"?sl:"A1");
+if("serviceWorker" in navigator)window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})});
+</script>
+</body>
+</html>
